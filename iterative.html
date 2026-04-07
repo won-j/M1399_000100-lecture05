@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Joong-Ho Won">
+
+<title>Lecture 5: Iterative Methods for Solving Linear Equations</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="iterative_files/libs/clipboard/clipboard.min.js"></script>
+<script src="iterative_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="iterative_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="iterative_files/libs/quarto-html/popper.min.js"></script>
+<script src="iterative_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="iterative_files/libs/quarto-html/anchor.min.js"></script>
+<link href="iterative_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="iterative_files/libs/quarto-html/quarto-syntax-highlighting-b6a8276bf55561bdbc268162d41bd1f7.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="iterative_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="iterative_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="iterative_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#motivation-pagerank" id="toc-motivation-pagerank" class="nav-link" data-scroll-target="#motivation-pagerank">Motivation: PageRank</a></li>
+  <li><a href="#splitting-and-fixed-point-iteration" id="toc-splitting-and-fixed-point-iteration" class="nav-link" data-scroll-target="#splitting-and-fixed-point-iteration">Splitting and fixed point iteration</a>
+  <ul class="collapse">
+  <li><a href="#review-of-vector-norms" id="toc-review-of-vector-norms" class="nav-link" data-scroll-target="#review-of-vector-norms">Review of vector norms</a></li>
+  <li><a href="#matrix-norms" id="toc-matrix-norms" class="nav-link" data-scroll-target="#matrix-norms">Matrix norms</a></li>
+  <li><a href="#convergence-of-iterative-methods" id="toc-convergence-of-iterative-methods" class="nav-link" data-scroll-target="#convergence-of-iterative-methods">Convergence of iterative methods</a></li>
+  <li><a href="#theorem" id="toc-theorem" class="nav-link" data-scroll-target="#theorem">Theorem</a></li>
+  <li><a href="#implications" id="toc-implications" class="nav-link" data-scroll-target="#implications">Implications</a></li>
+  </ul></li>
+  <li><a href="#jacobis-method" id="toc-jacobis-method" class="nav-link" data-scroll-target="#jacobis-method">Jacobi’s method</a></li>
+  <li><a href="#gauss-seidel-method" id="toc-gauss-seidel-method" class="nav-link" data-scroll-target="#gauss-seidel-method">Gauss-Seidel method</a></li>
+  <li><a href="#successive-over-relaxation-sor" id="toc-successive-over-relaxation-sor" class="nav-link" data-scroll-target="#successive-over-relaxation-sor">Successive over-relaxation (SOR)</a></li>
+  <li><a href="#conjugate-gradient-method" id="toc-conjugate-gradient-method" class="nav-link" data-scroll-target="#conjugate-gradient-method">Conjugate gradient method</a></li>
+  <li><a href="#numerical-examples" id="toc-numerical-examples" class="nav-link" data-scroll-target="#numerical-examples">Numerical examples</a>
+  <ul class="collapse">
+  <li><a href="#generate-test-matrix" id="toc-generate-test-matrix" class="nav-link" data-scroll-target="#generate-test-matrix">Generate test matrix</a></li>
+  <li><a href="#matrix-vector-muliplication" id="toc-matrix-vector-muliplication" class="nav-link" data-scroll-target="#matrix-vector-muliplication">Matrix-vector muliplication</a></li>
+  <li><a href="#dense-solve-via-cholesky" id="toc-dense-solve-via-cholesky" class="nav-link" data-scroll-target="#dense-solve-via-cholesky">Dense solve via Cholesky</a></li>
+  <li><a href="#jacobi-solver" id="toc-jacobi-solver" class="nav-link" data-scroll-target="#jacobi-solver">Jacobi solver</a></li>
+  <li><a href="#gauss-seidel" id="toc-gauss-seidel" class="nav-link" data-scroll-target="#gauss-seidel">Gauss-Seidel</a></li>
+  <li><a href="#sor" id="toc-sor" class="nav-link" data-scroll-target="#sor">SOR</a></li>
+  <li><a href="#conjugate-gradient" id="toc-conjugate-gradient" class="nav-link" data-scroll-target="#conjugate-gradient">Conjugate Gradient</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="iterative.ipynb" download="iterative.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lecture 5: Iterative Methods for Solving Linear Equations</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Joong-Ho Won </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p><!-- Requires 'collapse-output' quarto package: https://github.com/mcanouil/quarto-collapse-output --></p>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>R version 4.5.2 (2025-10-31)
+Platform: aarch64-apple-darwin20
+Running under: macOS Tahoe 26.2
+
+Matrix products: default
+BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.5-arm64/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+time zone: Asia/Seoul
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] htmlwidgets_1.6.4 compiler_4.5.2    fastmap_1.2.0     cli_3.6.5        
+ [5] tools_4.5.2       htmltools_0.5.9   otel_0.2.0        yaml_2.3.12      
+ [9] rmarkdown_2.30    knitr_1.51        jsonlite_2.0.0    xfun_0.56        
+[13] digest_0.6.39     rlang_1.1.7       evaluate_1.0.5   </code></pre>
+</div>
+</details>
+</div>
+<div class="cell" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Matrix)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Rlinsolve)  <span class="co"># iterative linear solvers</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="do">## ** ------------------------------------------------------- **</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="do">## ** Rlinsolve</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="do">## **  - Solving (Sparse) System of Linear Equations</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="do">## **</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="do">## ** Version    : 0.3.3      (2026)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="do">## ** Maintainer : Kisung You (kisung.you@outlook.com)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="do">## **</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="do">## ** Please share any bugs or suggestions to the maintainer.</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="do">## ** ------------------------------------------------------- **</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SparseM) <span class="co"># for visualization</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="do">## Attaching package: 'SparseM'</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="do">## The following object is masked from 'package:Matrix':</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="do">## </span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="do">##     det</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lobstr)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(microbenchmark)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>So far we have considered direct methods for solving linear equations.</p>
+<ul>
+<li><strong>Direct methods</strong> (flops fixed <em>a priori</em>) vs <strong>iterative methods</strong>:
+<ul>
+<li>Direct method (GE/LU, Cholesky, QR, SVD): accurate. good for dense, small to moderate sized <span class="math inline">\(\mathbf{A}\)</span><br>
+</li>
+<li>Iterative methods (Jacobi, Gauss-Seidal, SOR, conjugate-gradient, GMRES): accuracy depends on number of iterations. good for large, sparse, structured linear system, parallel computing, warm start (reasonable accuracy after, say, 100 iterations)</li>
+</ul></li>
+</ul>
+</section>
+<section id="motivation-pagerank" class="level2">
+<h2 class="anchored" data-anchor-id="motivation-pagerank">Motivation: PageRank</h2>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/PageRanks-Example.svg/400px-PageRanks-Example.svg.png" width="400" align="center"></p>
+<p>Source: <a href="https://en.wikipedia.org/wiki/PageRank">Wikepedia</a></p>
+<ul>
+<li><p><span class="math inline">\(\mathbf{A}  \in \{0,1\}^{n \times n}\)</span> the connectivity matrix of webpages with entries <span class="math display">\[
+\begin{eqnarray*}
+  a_{ij} = \begin{cases}
+  1 &amp;  \text{if page $i$ links to page $j$} \\
+  0 &amp; \text{otherwise}
+  \end{cases}.
+\end{eqnarray*}
+\]</span> <span class="math inline">\(n \approx 10^9\)</span> in May 2017.</p></li>
+<li><p><span class="math inline">\(r_i = \sum_j a_{ij}\)</span> is the <em>out-degree</em> of page <span class="math inline">\(i\)</span>.</p></li>
+<li><p><a href="https://en.wikipedia.org/wiki/PageRank">Larry Page</a> imagined a random surfer wandering on internet according to following rules:</p>
+<ul>
+<li>From a page <span class="math inline">\(i\)</span> with <span class="math inline">\(r_i&gt;0\)</span>
+<ul>
+<li>with probability <span class="math inline">\(p\)</span>, (s)he randomly chooses a link <span class="math inline">\(j\)</span> from page <span class="math inline">\(i\)</span> (uniformly) and follows that link to the next page<br>
+</li>
+<li>with probability <span class="math inline">\(1-p\)</span>, (s)he randomly chooses one page from the set of all <span class="math inline">\(n\)</span> pages (uniformly) and proceeds to that page</li>
+</ul></li>
+<li>From a page <span class="math inline">\(i\)</span> with <span class="math inline">\(r_i=0\)</span> (a dangling page), (s)he randomly chooses one page from the set of all <span class="math inline">\(n\)</span> pages (uniformly) and proceeds to that page</li>
+</ul></li>
+<li><p>The process defines an <span class="math inline">\(n\)</span>-state Markov chain, where each state corresponds to each page. <span class="math display">\[
+  p_{ij} = (1-p)\frac{1}{n} + p\frac{a_{ij}}{r_i}
+\]</span> with interpretation <span class="math inline">\(a_{ij}/r_i = 1/n\)</span> if <span class="math inline">\(r_i = 0\)</span>.</p></li>
+<li><p>Stationary distribution of this Markov chain gives the score (long term probability of visit) of each page.</p></li>
+<li><p>Stationary distribution can be obtained as the top <em>left</em> eigenvector of the transition matrix <span class="math inline">\(\mathbf{P}=(p_{ij})\)</span> corresponding to eigenvalue 1. <span class="math display">\[
+  \mathbf{x}^T\mathbf{P} = \mathbf{x}^T.
+\]</span> Equivalently it can be cast as a linear equation. <span class="math display">\[
+  (\mathbf{I} - \mathbf{P}^T) \mathbf{x} = \mathbf{0}.
+\]</span></p></li>
+<li><p>You’ve got to solve a linear equation with <span class="math inline">\(10^9\)</span> variables!</p></li>
+<li><p>GE/LU will take <span class="math inline">\(2 \times (10^9)^3/3/10^{12} \approx 6.66 \times 10^{14}\)</span> seconds <span class="math inline">\(\approx 20\)</span> million years on a tera-flop supercomputer!</p></li>
+<li><p>Iterative methods come to the rescue.</p></li>
+</ul>
+</section>
+<section id="splitting-and-fixed-point-iteration" class="level2">
+<h2 class="anchored" data-anchor-id="splitting-and-fixed-point-iteration">Splitting and fixed point iteration</h2>
+<ul>
+<li><p>The key idea of iterative method for solving <span class="math inline">\(\mathbf{A}\mathbf{x}=\mathbf{b}\)</span> is to <strong>split</strong> the matrix <span class="math inline">\(\mathbf{A}\)</span> so that <span class="math display">\[
+  \mathbf{A} = \mathbf{M} - \mathbf{K}
+\]</span> where <span class="math inline">\(\mathbf{M}\)</span> is invertible and easy to invert.</p></li>
+<li><p>Then <span class="math inline">\(\mathbf{A}\mathbf{x} = \mathbf{M}\mathbf{x} - \mathbf{K}\mathbf{x} = \mathbf{b}\)</span> or <span class="math display">\[
+  \mathbf{x} = \mathbf{M}^{-1}\mathbf{K}\mathbf{x} + \mathbf{M}^{-1}\mathbf{b}
+  .
+\]</span> Thus a solution to <span class="math inline">\(\mathbf{A}\mathbf{x}=\mathbf{b}\)</span> is a fixed point of iteration <span class="math display">\[
+  \mathbf{x}^{(t+1)} = \mathbf{M}^{-1}\mathbf{K}\mathbf{x}^{(t)} + \mathbf{M}^{-1}\mathbf{b}
+  = \mathbf{R}\mathbf{x}^{(t)} + \mathbf{c}
+  .
+\]</span></p></li>
+<li><p>Under a suitable choice of <span class="math inline">\(\mathbf{R}\)</span>, i.e., splitting of <span class="math inline">\(\mathbf{A}\)</span>, the sequence <span class="math inline">\(\mathbf{x}^{(k)}\)</span> generated by the above iteration converges to a solution <span class="math inline">\(\mathbf{A}\mathbf{x}=\mathbf{b}\)</span>:</p></li>
+</ul>
+<blockquote class="blockquote">
+<p>Let <span class="math inline">\(\rho(\mathbf{R})=\max_{i=1,\dotsc,n}|\lambda_i(\mathbf{R})|\)</span>, where <span class="math inline">\(\lambda_i(\mathbf{R})\)</span> is the <span class="math inline">\(i\)</span>th (complex) eigenvalue of <span class="math inline">\(\mathbf{R}\)</span>. When <span class="math inline">\(\mathbf{A}\)</span> is invertible, the iteration <span class="math inline">\(\mathbf{x}^{(t+1)}=\mathbf{R}\mathbf{x}^{(t)} + \mathbf{c}\)</span> converges to <span class="math inline">\(\mathbf{A}^{-1}\mathbf{b}\)</span> for any <span class="math inline">\(\mathbf{x}^{(0)}\)</span> if and only if <span class="math inline">\(\rho(\mathbf{R}) &lt; 1\)</span>.</p>
+</blockquote>
+<section id="review-of-vector-norms" class="level3">
+<h3 class="anchored" data-anchor-id="review-of-vector-norms">Review of vector norms</h3>
+<p>A norm <span class="math inline">\(\|\cdot\|: \mathbb{R}^n \to \mathbb{R}\)</span> is defined by the following properties:</p>
+<ol type="1">
+<li><span class="math inline">\(\|\mathbf{x}\| \ge 0\)</span>,</li>
+<li><span class="math inline">\(\|\mathbf{x}\| = 0 \iff \mathbf{x} = \mathbf{0}\)</span>,</li>
+<li><span class="math inline">\(\|c\mathbf{x}\| = |c|\|\mathbf{x}\|\)</span> for all <span class="math inline">\(c \in \mathbb{R}\)</span>,</li>
+<li><span class="math inline">\(\|\mathbf{x} + \mathbf{y}\| \le \|\mathbf{x}\| + \|\mathbf{y}\|\)</span>.</li>
+</ol>
+<p>Typicall norms are * <span class="math inline">\(\ell_2\)</span> (Euclidean) norm: <span class="math inline">\(\|\mathbf{x}\| = \sqrt{\sum_{i=1}^nx_i^2}\)</span>; * <span class="math inline">\(\ell_1\)</span> norm: <span class="math inline">\(\|\mathbf{x}\| = \sum_{i=1}^n|x_i|\)</span>; * <span class="math inline">\(\ell_{\infty}\)</span> (Manhatan) norm: <span class="math inline">\(\|\mathbf{x}\| = \max_{i=1,\dots,n}|x_i|\)</span>;</p>
+</section>
+<section id="matrix-norms" class="level3">
+<h3 class="anchored" data-anchor-id="matrix-norms">Matrix norms</h3>
+<ul>
+<li>Matrix <span class="math inline">\(\mathbf{A} \in \mathbb{R}^{n\times n}\)</span> can be considered as a vector in <span class="math inline">\(\mathbb{R}^{n^2}\)</span>.</li>
+<li>However, it is convinient if a matrix norm is compatible with matrix multiplication.</li>
+<li>In addition to the defining properties of a norm above, we require</li>
+</ul>
+<ol start="5" type="1">
+<li><span class="math inline">\(\|\mathbf{A}\mathbf{B}\| \le \|\mathbf{A}\|\|\mathbf{B}\|\)</span>.</li>
+</ol>
+<p>Typical matrix norms are * Frobenius norm: <span class="math inline">\(\|\mathbf{A}\|_F = \sqrt{\sum_{i,j=1}^n a_{ij}^2} = \sqrt{\text{trace}(\mathbf{A}\mathbf{A}^T)}\)</span>; * Operator norm (induced by a vector norm <span class="math inline">\(\|\cdot\|\)</span>): <span class="math inline">\(\|\mathbf{A}\| = \sup_{\mathbf{y}\neq\mathbf{0}}\frac{\|\mathbf{A}\mathbf{y}\|}{\|\mathbf{y}\|}\)</span>.</p>
+<p>It can be shown that * <span class="math inline">\(\|\mathbf{A}\|_1 = \max_{j=1,\dotsc,n}\sum_{i=1}^n|a_{ij}|\)</span>; * <span class="math inline">\(\|\mathbf{A}\|_{\infty} = \max_{i=1,\dotsc,n}\sum_{j=1}^n|a_{ij}|\)</span>; * <span class="math inline">\(\|\mathbf{A}\|_2 = \sqrt{\rho(\mathbf{A}^T\mathbf{A})}\)</span>.</p>
+</section>
+<section id="convergence-of-iterative-methods" class="level3">
+<h3 class="anchored" data-anchor-id="convergence-of-iterative-methods">Convergence of iterative methods</h3>
+<ul>
+<li>Let <span class="math inline">\(\mathbf{x}^{\star}\)</span> be a solution of <span class="math inline">\(\mathbf{A}\mathbf{x} = \mathbf{b}\)</span>.</li>
+<li>Equivalently, <span class="math inline">\(\mathbf{x}^{\star}\)</span> satisfies <span class="math inline">\(\mathbf{x}^{\star} = \mathbf{R}\mathbf{x}^{\star} + \mathbf{c}\)</span>.</li>
+<li>Subtracting this from <span class="math inline">\(\mathbf{x}^{(t+1)} = \mathbf{R}\mathbf{x}^{(t)} + \mathbf{c}\)</span>, we have <span class="math display">\[
+  \mathbf{x}^{(t+1)} - \mathbf{x}^{\star} = \mathbf{R}(\mathbf{x}^{(t)} - \mathbf{x}^{\star}).
+\]</span></li>
+<li>Take a vector norm on both sides: <span class="math display">\[
+  \|\mathbf{x}^{(t+1)} - \mathbf{x}^{\star}\| = \|\mathbf{R}(\mathbf{x}^{(t)} - \mathbf{x}^{\star})\|
+  \le \|\mathbf{R}\|\|\mathbf{x}^{(t)} - \mathbf{x}^{\star}\|
+\]</span> where <span class="math inline">\(\|\mathbf{R}\|\)</span> is the induced operator norm.</li>
+<li>Thus if <span class="math inline">\(\|\mathbf{R}\| &lt; 1\)</span> for a certain (induced) norm, then <span class="math inline">\(\mathbf{x}^{(t)} \to \mathbf{x}^{\star}\)</span>.</li>
+</ul>
+</section>
+<section id="theorem" class="level3">
+<h3 class="anchored" data-anchor-id="theorem">Theorem</h3>
+<blockquote class="blockquote">
+<p>The spectral radius <span class="math inline">\(\rho(\mathbf{A})\)</span> of a matrix <span class="math inline">\(\mathbf{A}\in\mathbb{R}^{n\times n}\)</span> satisfies <span class="math display">\[
+\rho(\mathbf{A}) \le \|\mathbf{A}\|
+\]</span> for any operator norm. Furthermore, for any <span class="math inline">\(\mathbf{A}\in\mathbb{R}^{n\times n}\)</span> and <span class="math inline">\(\epsilon &gt; 0\)</span>, there is an operator norm <span class="math inline">\(\|\cdot\|\)</span> such that <span class="math inline">\(\|\mathbf{A}\| \le \rho(\mathbf{A}) + \epsilon\)</span>.<br>
+In other words, <span class="math display">\[
+\rho(\mathbf{A}) = \inf_{\|\cdot\|: \text{operator norm}} \|\mathbf{A}\|.
+\]</span></p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Thus it is immediate to see <span class="math display">\[
+\rho(\mathbf{A}) &lt; 1 \iff \|\mathbf{A}\| &lt; 1
+\]</span> for some operator norm.</p>
+</blockquote>
+<section id="proof" class="level4">
+<h4 class="anchored" data-anchor-id="proof">Proof</h4>
+<p>If <span class="math inline">\(\lambda\)</span> is an eigenvalue of <span class="math inline">\(\mathbf{A}\)</span> with nonzero eigenvector <span class="math inline">\(\mathbf{v}\)</span>, then <span class="math display">\[
+    \|\mathbf{A}\mathbf{v}\| = |\lambda|\|\mathbf{v}\|
+\]</span> (for a vector norm). So <span class="math display">\[
+    |\lambda| = \frac{\|\mathbf{A}\mathbf{v}\|}{\|\mathbf{v}\|} \le \|\mathbf{A}\|,
+\]</span> implying the first inequality.</p>
+<p>For the second part, suppose <span class="math inline">\(\mathbf{A}\in\mathbb{R}^{n\times n}\)</span> and <span class="math inline">\(\epsilon &gt; 0\)</span> are given. Then there exists an (complex) upper triangular matrix <span class="math inline">\(\mathbf{T}\)</span> and an invertible matrix <span class="math inline">\(\mathbf{S}\)</span> such that <span class="math display">\[
+    \mathbf{A} = \mathbf{S}\mathbf{T}\mathbf{S}^{-1}
+\]</span> and the eigenvalues of <span class="math inline">\(\mathbf{A}\)</span> coincides with the diagonal entries of <span class="math inline">\(\mathbf{T}\)</span>. (Schur decomposition).</p>
+<p>For <span class="math inline">\(\delta &gt; 0\)</span> consider a diagonal matrix <span class="math inline">\(\mathbf{D}(\delta)=\text{diag}(1, \delta, \delta^2, \dotsc, \delta^{n-1})\)</span>, which is invertible. Then</p>
+<p><span class="math display">\[
+\mathbf{T}(\delta)
+\triangleq \mathbf{D}(\delta)^{-1}\mathbf{T}\mathbf{D}(\delta)
+=\mathbf{D}(\delta)^{-1}\mathbf{S}^{-1}\mathbf{A}\mathbf{S}\mathbf{D}(\delta)
+= (\mathbf{S}\mathbf{D}(\delta))^{-1}\mathbf{A}(\mathbf{S}\mathbf{D}(\delta))
+\]</span></p>
+<p>is an upper triangular matrix with entries <span class="math inline">\((\delta^{j-i}t_{ij})\)</span> for <span class="math inline">\(j \ge i\)</span>. So the off-diagonal entries tends to 0 as <span class="math inline">\(\delta \to 0\)</span>.</p>
+<p>Check <span class="math display">\[
+\|\mathbf{x}\|_{\delta} := \|(\mathbf{S}\mathbf{D}(\delta))^{-1}\mathbf{x}\|_{\infty}
+\]</span> defines a vector norm, which induces</p>
+<p><span class="math display">\[
+\begin{split}
+\|\mathbf{A}\|_{\delta}
+&amp;\triangleq \sup_{\mathbf{x}\neq\mathbf{0}}\frac{\|\mathbf{A}\mathbf{x}\|_{\delta}}{\|\mathbf{x}\|_{\delta}}
+= \sup_{\mathbf{x}\neq\mathbf{0}}\frac{\|[\mathbf{S}\mathbf{D}(\delta)]^{-1}\mathbf{A}\mathbf{x}\|_{\infty}}{\|[\mathbf{S}\mathbf{D}(\delta)]^{-1}\mathbf{x}\|_{\infty}}
+\\
+&amp;= \|(\mathbf{S}\mathbf{D}(\delta))^{-1}\mathbf{A}(\mathbf{S}\mathbf{D}(\delta))\|_{\infty} = \|\mathbf{T}(\delta)\|_{\infty}
+= \max_{i=1,\dotsc,n}\sum_{j=i}^n |t_{ij}|\delta^{j-i}.
+\end{split}
+\]</span></p>
+<p>Since for <span class="math inline">\(\mathbf{y} = [\mathbf{S}\mathbf{D}(\delta)]^{-1}\mathbf{x}\)</span>, there holds <span class="math inline">\(\mathbf{x} = [\mathbf{S}\mathbf{D}(\delta)]\mathbf{y}\)</span> and<br>
+<span class="math display">\[
+\sup_{\mathbf{x}\neq\mathbf{0}}\frac{\|[\mathbf{S}\mathbf{D}(\delta)]^{-1}\mathbf{A}\mathbf{x}\|_{\infty}}{\|[\mathbf{S}\mathbf{D}(\delta)]^{-1}\mathbf{x}\|_{\infty}}
+=
+\sup_{\mathbf{y}\neq\mathbf{0}}\frac{\|[\mathbf{S}\mathbf{D}(\delta)]^{-1}\mathbf{A}[\mathbf{S}\mathbf{D}(\delta)]\mathbf{y}\|_{\infty}}{\|[\mathbf{S}\mathbf{D}(\delta)]^{-1}[\mathbf{S}\mathbf{D}(\delta)]\mathbf{y}\|_{\infty}}
+=
+\sup_{\mathbf{y}\neq\mathbf{0}}\frac{\|[\mathbf{S}\mathbf{D}(\delta)]^{-1}\mathbf{A}[\mathbf{S}\mathbf{D}(\delta)]\mathbf{y}\|_{\infty}}{\|\mathbf{y}\|_{\infty}}
+\]</span></p>
+<p>Now since the eigenvalues of <span class="math inline">\(\mathbf{A}\)</span> coincides with <span class="math inline">\(t_{ii}\)</span>, for each <span class="math inline">\(\epsilon&gt;0\)</span> we can take a sufficiently small <span class="math inline">\(\delta &gt; 0\)</span> so that <span class="math display">\[
+    \max_{i=1,\dotsc,n}\sum_{j=i}^n |t_{ij}|\delta^{j-i} \le \rho(\mathbf{A}) + \epsilon.
+\]</span> This implies <span class="math inline">\(\|\mathbf{A}\|_{\delta} \le \rho(\mathbf{A}) + \epsilon\)</span>.</p>
+</section>
+</section>
+<section id="implications" class="level3">
+<h3 class="anchored" data-anchor-id="implications">Implications</h3>
+<ul>
+<li><p>Recall &gt; Let <span class="math inline">\(\rho(\mathbf{R})=\max_{i=1,\dotsc,n}|\lambda_i(\mathbf{R})|\)</span>, where <span class="math inline">\(\lambda_i(\mathbf{R})\)</span> is the <span class="math inline">\(i\)</span>th (complex) eigenvalue of <span class="math inline">\(\mathbf{R}\)</span>. When <span class="math inline">\(\mathbf{A}\)</span> is invertible, the iteration <span class="math inline">\(\mathbf{x}^{(t+1)}=\mathbf{R}\mathbf{x}^{(t)} + \mathbf{c}\)</span> converges to <span class="math inline">\(\mathbf{A}^{-1}\mathbf{b}\)</span> for any <span class="math inline">\(\mathbf{x}^{(0)}\)</span> if and only if <span class="math inline">\(\rho(\mathbf{R}) &lt; 1\)</span>.</p></li>
+<li><p>The <em>if</em> part is proved using the above Theorem. This part holds even if <span class="math inline">\(\mathbf{A}\)</span> is singular; the limit may depend on <span class="math inline">\(\mathbf{x}^{(0)}\)</span>, but it is always a solution to <span class="math inline">\(\mathbf{A}\mathbf{x} = \mathbf{b}\)</span>.</p></li>
+<li><p>The <em>only if</em> part when <span class="math inline">\(\mathbf{A}\)</span> is inverible (hence <span class="math inline">\(\mathbf{x}^{\star}\)</span> is unique):<br>
+<span class="math display">\[
+  \mathbf{x}^{(t)} - \mathbf{x}^{\star} = \mathbf{R}^t(\mathbf{x}^{(0)} - \mathbf{x}^{\star}).
+\]</span><br>
+If LHS converges to zero for any <span class="math inline">\(\mathbf{x}^{(0)}\)</span>, then <span class="math inline">\(\mathbf{R}^t \to \mathbf{0}\)</span> as <span class="math inline">\(t \to \infty\)</span>. This cannot occur if <span class="math inline">\(|\lambda_i(\mathbf{R})| \ge 1\)</span> for some <span class="math inline">\(i\)</span>: if <span class="math inline">\(\mathbf{x}^{(0)} = \mathbf{v}_i + \mathbf{x}^{\star}\)</span> for an eigenvector <span class="math inline">\(\mathbf{v}_i \neq \mathbf{0}\)</span> such that <span class="math inline">\(\mathbf{R}\mathbf{v}_i = \lambda_i\mathbf{v}_i\)</span>, then <span class="math inline">\(\| R^t(\mathbf{x}^{(0)} - \mathbf{x}^{\star}) \| = |\lambda_i|^t\|\mathbf{v}_i\| \geq \|\mathbf{v}_i\| \neq 0\)</span>.</p>
+<ul>
+<li>Invertibility is necessary since otherwise we do not know if <span class="math inline">\(\mathbf{x}^{(t)}\)</span> converges to a unique point.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="jacobis-method" class="level2">
+<h2 class="anchored" data-anchor-id="jacobis-method">Jacobi’s method</h2>
+<p><span class="math display">\[
+x_i^{(t+1)} = \frac{b_i - \sum_{j=1}^{i-1} a_{ij} x_j^{(t)} - \sum_{j=i+1}^n a_{ij} x_j^{(t)}}{a_{ii}}.
+\]</span></p>
+<ul>
+<li><p>Split <span class="math inline">\(\mathbf{A} = \mathbf{L} + \mathbf{D} + \mathbf{U}\)</span> = (strictly lower triangular) + (diagonal) + (strictly upper triangular).</p></li>
+<li><p>Take <span class="math inline">\(\mathbf{M}=\mathbf{D}\)</span> (easy to invert!) and <span class="math inline">\(\mathbf{K}=-(\mathbf{L} + \mathbf{U})\)</span>: <span class="math display">\[
+  \mathbf{D} \mathbf{x}^{(t+1)} = - (\mathbf{L} + \mathbf{U}) \mathbf{x}^{(t)} + \mathbf{b},
+\]</span> i.e., <span class="math display">\[
+  \mathbf{x}^{(t+1)} = - \mathbf{D}^{-1} (\mathbf{L} + \mathbf{U}) \mathbf{x}^{(t)} + \mathbf{D}^{-1} \mathbf{b} = - \mathbf{D}^{-1} \mathbf{A} \mathbf{x}^{(t)} + \mathbf{x}^{(t)} + \mathbf{D}^{-1} \mathbf{b}.
+\]</span></p></li>
+<li><p>Convergence is guaranteed if <span class="math inline">\(\mathbf{A}\)</span> is striclty row diagonally dominant: <span class="math inline">\(|a_{ii}| &gt; \sum_{j\neq i}|a_{ij}|\)</span>.</p></li>
+<li><p>One round costs <span class="math inline">\(2n^2\)</span> flops with an <strong>unstructured</strong> <span class="math inline">\(\mathbf{A}\)</span>. Gain over GE/LU if converges in <span class="math inline">\(o(n)\)</span> iterations.</p></li>
+<li><p>Saving is huge for <strong>sparse</strong> or <strong>structured</strong> <span class="math inline">\(\mathbf{A}\)</span>. By structured, we mean the matrix-vector multiplication <span class="math inline">\(\mathbf{A} \mathbf{v}\)</span> is fast (<span class="math inline">\(O(n)\)</span> or <span class="math inline">\(O(n \log n)\)</span>).</p>
+<ul>
+<li>Often the multiplication is implicit and <span class="math inline">\(\mathbf{A}\)</span> is not even stored, e.g., finite difference: <span class="math inline">\((\mathbf{A}\mathbf{v})_i = v_i - v_{i+1}\)</span>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="gauss-seidel-method" class="level2">
+<h2 class="anchored" data-anchor-id="gauss-seidel-method">Gauss-Seidel method</h2>
+<p><span class="math display">\[
+x_i^{(t+1)} = \frac{b_i - \sum_{j=1}^{i-1} a_{ij} x_j^{(t+1)} - \sum_{j=i+1}^n a_{ij} x_j^{(t)}}{a_{ii}}.
+\]</span></p>
+<ul>
+<li><p>Split <span class="math inline">\(\mathbf{A} = \mathbf{L} + \mathbf{D} + \mathbf{U}\)</span> = (strictly lower triangular) + (diagonal) + (strictly upper triangular) as Jacobi.</p></li>
+<li><p>Take <span class="math inline">\(\mathbf{M}=\mathbf{D}+\mathbf{L}\)</span> (easy to invert, why?) and <span class="math inline">\(\mathbf{K}=-\mathbf{U}\)</span>: <span class="math display">\[
+(\mathbf{D} + \mathbf{L}) \mathbf{x}^{(t+1)} = - \mathbf{U} \mathbf{x}^{(t)} + \mathbf{b}
+\]</span> i.e., <span class="math display">\[
+\mathbf{x}^{(t+1)} = - (\mathbf{D} + \mathbf{L})^{-1} \mathbf{U} \mathbf{x}^{(t)} + (\mathbf{D} + \mathbf{L})^{-1} \mathbf{b}.
+\]</span></p></li>
+<li><p>Equivalent to <span class="math display">\[
+\mathbf{D}\mathbf{x}^{(t+1)} = - \mathbf{L} \mathbf{x}^{(t+1)} - \mathbf{U} \mathbf{x}^{(t)} + \mathbf{b}
+\]</span> or <span class="math display">\[
+\mathbf{x}^{(t+1)} = \mathbf{D}^{-1}(- \mathbf{L} \mathbf{x}^{(t+1)} - \mathbf{U} \mathbf{x}^{(t)} + \mathbf{b})
+\]</span> leading to the iteration.</p></li>
+<li><p>“Coordinate descent” version of Jacobi.</p></li>
+<li><p>Convergence is guaranteed if <span class="math inline">\(\mathbf{A}\)</span> is striclty row diagonally dominant.</p></li>
+</ul>
+</section>
+<section id="successive-over-relaxation-sor" class="level2">
+<h2 class="anchored" data-anchor-id="successive-over-relaxation-sor">Successive over-relaxation (SOR)</h2>
+<p><span class="math display">\[
+x_i^{(t+1)} = \frac{\omega}{a_{ii}} \left( b_i - \sum_{j=1}^{i-1} a_{ij} x_j^{(t+1)} - \sum_{j=i+1}^n a_{ij} x_j^{(t)} \right)+ (1-\omega) x_i^{(t)},
+\]</span></p>
+<ul>
+<li><p><span class="math inline">\(\omega=1\)</span>: Gauss-Seidel; <span class="math inline">\(\omega \in (0, 1)\)</span>: underrelaxation; <span class="math inline">\(\omega &gt; 1\)</span>: overrelaxation</p>
+<ul>
+<li>Relaxation in hope of faster convergence</li>
+</ul></li>
+<li><p>Split <span class="math inline">\(\mathbf{A} = \mathbf{L} + \mathbf{D} + \mathbf{U}\)</span> = (strictly lower triangular) + (diagonal) + (strictly upper triangular) as before.</p></li>
+<li><p>Take <span class="math inline">\(\mathbf{M}=\frac{1}{\omega}\mathbf{D}+\mathbf{L}\)</span> (easy to invert, why?) and <span class="math inline">\(\mathbf{K}=\frac{1-\omega}{\omega}\mathbf{D}-\mathbf{U}\)</span>: <span class="math display">\[
+\begin{split}
+(\mathbf{D} + \omega \mathbf{L})\mathbf{x}^{(t+1)} &amp;= [(1-\omega) \mathbf{D} - \omega \mathbf{U}] \mathbf{x}^{(t)} +  \omega \mathbf{b}
+\\
+\mathbf{D}\mathbf{x}^{(t+1)} &amp;= (1-\omega) \mathbf{D}\mathbf{x}^{(t)} + \omega ( -\mathbf{U}\mathbf{x}^{(t)} - \mathbf{L}\mathbf{x}^{(t+1)}  + \mathbf{b} )
+\\
+\mathbf{x}^{(t+1)} &amp;= (1-\omega)\mathbf{x}^{(t)} + \omega \mathbf{D}^{-1} ( -\mathbf{U}\mathbf{x}^{(t)} - \mathbf{L}\mathbf{x}^{(t+1)}  + \mathbf{b} )
+\end{split}
+\]</span></p></li>
+</ul>
+</section>
+<section id="conjugate-gradient-method" class="level2">
+<h2 class="anchored" data-anchor-id="conjugate-gradient-method">Conjugate gradient method</h2>
+<ul>
+<li><p><strong>Conjugate gradient and its variants are the top-notch iterative methods for solving huge, structured linear systems.</strong></p></li>
+<li><p>Key idea: solving <span class="math inline">\(\mathbf{A} \mathbf{x} = \mathbf{b}\)</span> is equivalent to minimizing the quadratic function <span class="math inline">\(\frac{1}{2} \mathbf{x}^T \mathbf{A} \mathbf{x} - \mathbf{b}^T \mathbf{x}\)</span> if <span class="math inline">\(\mathbf{A}\)</span> <em>is positive definite</em>.</p>
+<p><a href="http://www.sciencedirect.com/science/article/pii/0021999178900980?via%3Dihub">Application to a fusion problem in physics</a>:</p></li>
+</ul>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Number of Iterations</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gauss-Seidel</td>
+<td>208,000</td>
+</tr>
+<tr class="even">
+<td>Block SOR methods</td>
+<td>765</td>
+</tr>
+<tr class="odd">
+<td>Incomplete Cholesky conjugate gradient</td>
+<td>25</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>We defer the details of CG to the graduate-level Advanced Statistical Computing course.</li>
+</ul>
+</section>
+<section id="numerical-examples" class="level2">
+<h2 class="anchored" data-anchor-id="numerical-examples">Numerical examples</h2>
+<p>The <a href="https://cran.r-project.org/web/packages/Rlinsolve/index.html"><code>Rlinsolve</code></a> package implements most commonly used iterative solvers.</p>
+<section id="generate-test-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="generate-test-matrix">Generate test matrix</h3>
+<p>Poisson matrix is a block tridiagonal matrix from (discretized) Poisson’s equation <span class="math inline">\(\nabla^2\psi = f\)</span> in on the plane (with a certain boundary condition). This matrix is sparse, symmetric positive definite and has known eigenvalues.</p>
+<p>Reference: G. H. Golub and C. F. Van Loan, Matrix Computations, second edition, Johns Hopkins University Press, Baltimore, Maryland, 1989 (Section 4.5.4).</p>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>get1DPoissonMatrix <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>      Matrix<span class="sc">::</span><span class="fu">bandSparse</span>(n, n, <span class="co">#dimensions</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                        (<span class="sc">-</span><span class="dv">1</span>)<span class="sc">:</span><span class="dv">1</span>, <span class="co">#band, diagonal is number 0</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">list</span>(<span class="fu">rep</span>(<span class="sc">-</span><span class="dv">1</span>, n<span class="dv">-1</span>), </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">rep</span>(<span class="dv">4</span>, n), </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">rep</span>(<span class="sc">-</span><span class="dv">1</span>, n<span class="dv">-1</span>)))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>get2DPoissonMatrix <span class="ot">&lt;-</span> <span class="cf">function</span>(n) {  <span class="co"># n^n by n^n</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    T <span class="ot">&lt;-</span> <span class="fu">get1DPoissonMatrix</span>(n)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    eye <span class="ot">&lt;-</span> Matrix<span class="sc">::</span><span class="fu">Diagonal</span>(n)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    N <span class="ot">&lt;-</span> n <span class="sc">*</span> n  <span class="do">## dimension of the final square matrix</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="do">## construct two block diagonal matrices</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    D <span class="ot">&lt;-</span> <span class="fu">bdiag</span>(<span class="fu">rep.int</span>(<span class="fu">list</span>(T), n))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    O <span class="ot">&lt;-</span> <span class="fu">bdiag</span>(<span class="fu">rep.int</span>(<span class="fu">list</span>(<span class="sc">-</span>eye), n <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="do">## augment O and add them together with D</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    D <span class="sc">+</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>     <span class="fu">rbind</span>(<span class="fu">cbind</span>(<span class="fu">Matrix</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(O), n), O), <span class="fu">Matrix</span>(<span class="dv">0</span>, n, N)) <span class="sc">+</span> </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>     <span class="fu">cbind</span>(<span class="fu">rbind</span>(<span class="fu">Matrix</span>(<span class="dv">0</span>, n, <span class="fu">ncol</span>(O)), O), <span class="fu">Matrix</span>(<span class="dv">0</span>, N, n))</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>M <span class="ot">&lt;-</span> <span class="fu">get2DPoissonMatrix</span>(<span class="dv">10</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>SparseM<span class="sc">::</span><span class="fu">image</span>(M)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="iterative_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</details>
+</div>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Poisson matrix of dimension n^2=2500 by n^2, pd and sparse</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">get2DPoissonMatrix</span>(n)  <span class="co"># sparse</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># dense matrix representation of A</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Afull <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(A)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># sparsity level</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">nnzero</span>(A) <span class="sc">/</span> <span class="fu">length</span>(A)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.001968</code></pre>
+</div>
+</details>
+</div>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>SparseM<span class="sc">::</span><span class="fu">image</span>(A)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="iterative_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</details>
+</div>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># storage difference</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>lobstr<span class="sc">::</span><span class="fu">obj_size</span>(A) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>159.10 kB</code></pre>
+</div>
+</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>lobstr<span class="sc">::</span><span class="fu">obj_size</span>(Afull)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>50.00 MB</code></pre>
+</div>
+</details>
+</div>
+</section>
+<section id="matrix-vector-muliplication" class="level3">
+<h3 class="anchored" data-anchor-id="matrix-vector-muliplication">Matrix-vector muliplication</h3>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># randomly generated vector of length n^2</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">456</span>) <span class="co"># seed</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># dense matrix-vector multiplication</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(Afull <span class="sc">%*%</span> b, A <span class="sc">%*%</span> b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in microbenchmark::microbenchmark(Afull %*% b, A %*% b): less accurate
+nanosecond times to avoid potential integer overflows</code></pre>
+</div>
+</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(res)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: microseconds
+        expr      min       lq       mean   median       uq      max neval
+ Afull %*% b 2064.801 2140.918 2295.80648 2230.831 2432.878 3746.867   100
+     A %*% b   10.496   12.628   27.08706   19.926   33.907  455.428   100</code></pre>
+</div>
+</details>
+</div>
+</section>
+<section id="dense-solve-via-cholesky" class="level3">
+<h3 class="anchored" data-anchor-id="dense-solve-via-cholesky">Dense solve via Cholesky</h3>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># record the Cholesky solution</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#Achol &lt;- base::chol(Afull)   # awfully slow</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>Achol <span class="ot">&lt;-</span> Matrix<span class="sc">::</span><span class="fu">Cholesky</span>(A)  <span class="co"># sparse Cholesky</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># two triangular solves;  2n^2 flops</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#y &lt;- solve(t(Achol), b) </span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#xchol &lt;- solve(Achol, y)</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>xchol <span class="ot">&lt;-</span> <span class="fu">solve</span>(Achol, b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="jacobi-solver" class="level3">
+<h3 class="anchored" data-anchor-id="jacobi-solver">Jacobi solver</h3>
+<p>It seems that Jacobi solver doesn’t give the correct answer.</p>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>xjacobi <span class="ot">&lt;-</span> Rlinsolve<span class="sc">::</span><span class="fu">lsolve.jacobi</span>(A, b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.jacobi : Initialiszed.</code></pre>
+</div>
+</details>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.jacobi : computations finished.</code></pre>
+</div>
+</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>Matrix<span class="sc">::</span><span class="fu">norm</span>(xjacobi<span class="sc">$</span>x <span class="sc">-</span> xchol, <span class="st">'F'</span>) <span class="sc">/</span> Matrix<span class="sc">::</span><span class="fu">norm</span>(<span class="fu">as.matrix</span>(xchol), <span class="st">'F'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1912401</code></pre>
+</div>
+</details>
+</div>
+<p><a href="https://cran.r-project.org/web/packages/Rlinsolve/Rlinsolve.pdf">Documentation</a> reveals that the default value of <code>maxiter</code> is 1000. A couple trial runs shows that 5000 Jacobi iterations are required to get an “accurate enough” solution.</p>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>xjacobi <span class="ot">&lt;-</span> Rlinsolve<span class="sc">::</span><span class="fu">lsolve.jacobi</span>(A, b, <span class="at">maxiter=</span><span class="dv">5000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.jacobi : Initialiszed.</code></pre>
+</div>
+</details>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.jacobi : computations finished.</code></pre>
+</div>
+</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>Matrix<span class="sc">::</span><span class="fu">norm</span>(xjacobi<span class="sc">$</span>x <span class="sc">-</span> xchol, <span class="st">'F'</span>) <span class="sc">/</span> Matrix<span class="sc">::</span><span class="fu">norm</span>(<span class="fu">as.matrix</span>(xchol), <span class="st">'F'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.001809093</code></pre>
+</div>
+</details>
+</div>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>xjacobi<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4690</code></pre>
+</div>
+</details>
+</div>
+</section>
+<section id="gauss-seidel" class="level3">
+<h3 class="anchored" data-anchor-id="gauss-seidel">Gauss-Seidel</h3>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gauss-Seidel solution is fairly close to Cholesky solution after 5000 iters</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>xgs <span class="ot">&lt;-</span> Rlinsolve<span class="sc">::</span><span class="fu">lsolve.gs</span>(A, b, <span class="at">maxiter=</span><span class="dv">5000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.gs : Initialiszed.</code></pre>
+</div>
+</details>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.gs : computations finished.</code></pre>
+</div>
+</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>Matrix<span class="sc">::</span><span class="fu">norm</span>(xgs<span class="sc">$</span>x <span class="sc">-</span> xchol, <span class="st">'F'</span>) <span class="sc">/</span> Matrix<span class="sc">::</span><span class="fu">norm</span>(<span class="fu">as.matrix</span>(xchol), <span class="st">'F'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.001811784</code></pre>
+</div>
+</details>
+</div>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>xgs<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1548</code></pre>
+</div>
+</details>
+</div>
+</section>
+<section id="sor" class="level3">
+<h3 class="anchored" data-anchor-id="sor">SOR</h3>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co"># symmetric SOR with ω=0.75</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>xsor <span class="ot">&lt;-</span> Rlinsolve<span class="sc">::</span><span class="fu">lsolve.ssor</span>(A, b, <span class="at">w=</span><span class="fl">0.75</span>, <span class="at">maxiter=</span><span class="dv">5000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.ssor : Initialiszed.</code></pre>
+</div>
+</details>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.ssor : computations finished.</code></pre>
+</div>
+</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>Matrix<span class="sc">::</span><span class="fu">norm</span>(xsor<span class="sc">$</span>x <span class="sc">-</span> xchol, <span class="st">'F'</span>) <span class="sc">/</span> Matrix<span class="sc">::</span><span class="fu">norm</span>(<span class="fu">as.matrix</span>(xchol), <span class="st">'F'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.001788622</code></pre>
+</div>
+</details>
+</div>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>xsor<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1303</code></pre>
+</div>
+</details>
+</div>
+</section>
+<section id="conjugate-gradient" class="level3">
+<h3 class="anchored" data-anchor-id="conjugate-gradient">Conjugate Gradient</h3>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="co"># conjugate gradient</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>xcg <span class="ot">&lt;-</span> Rlinsolve<span class="sc">::</span><span class="fu">lsolve.cg</span>(A, b)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.cg : Initialiszed.</code></pre>
+</div>
+</details>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.cg : preprocessing finished ...</code></pre>
+</div>
+</details>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.cg : convergence was well achieved.</code></pre>
+</div>
+</details>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stderr">
+<pre><code>* lsolve.cg : computations finished.</code></pre>
+</div>
+</details>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>Matrix<span class="sc">::</span><span class="fu">norm</span>(xcg<span class="sc">$</span>x <span class="sc">-</span> xchol, <span class="st">'F'</span>) <span class="sc">/</span> Matrix<span class="sc">::</span><span class="fu">norm</span>(<span class="fu">as.matrix</span>(xchol), <span class="st">'F'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 9.387256e-06</code></pre>
+</div>
+</details>
+</div>
+<div class="cell" data-output-fold="true" data-jupyter="{&quot;outputs_hidden&quot;:true}">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>xcg<span class="sc">$</span>iter</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<details><summary>Code Output</summary>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 119</code></pre>
+</div>
+</details>
+</div>
+<ul>
+<li>A basic tenet in numerical analysis:</li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>The structure should be exploited whenever possible in solving a problem.</strong></p>
+</blockquote>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
