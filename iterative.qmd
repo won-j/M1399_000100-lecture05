@@ -123,9 +123,10 @@ A norm $\|\cdot\|: \mathbb{R}^n \to \mathbb{R}$ is defined by the following prop
 4. $\|\mathbf{x} + \mathbf{y}\| \le \|\mathbf{x}\| + \|\mathbf{y}\|$.
 
 Typicall norms are
-* $\ell_2$ (Euclidean) norm: $\|\mathbf{x}\| = \sqrt{\sum_{i=1}^nx_i^2}$;
-* $\ell_1$ norm: $\|\mathbf{x}\| = \sum_{i=1}^n|x_i|$;
-* $\ell_{\infty}$ (Manhatan) norm: $\|\mathbf{x}\| = \max_{i=1,\dots,n}|x_i|$;
+
+-   $\ell_2$ (Euclidean) norm: $\|\mathbf{x}\| = \sqrt{\sum_{i=1}^nx_i^2}$;
+-   $\ell_1$ (Manhattan) norm: $\|\mathbf{x}\| = \sum_{i=1}^n|x_i|$;
+-   $\ell_{\infty}$ (sup) norm: $\|\mathbf{x}\| = \max_{i=1,\dots,n}|x_i|$;
 
 ### Matrix norms
 
@@ -136,19 +137,21 @@ Typicall norms are
 5. $\|\mathbf{A}\mathbf{B}\| \le \|\mathbf{A}\|\|\mathbf{B}\|$.
 
 Typical matrix norms are
-* Frobenius norm: $\|\mathbf{A}\|_F = \sqrt{\sum_{i,j=1}^n a_{ij}^2} = \sqrt{\text{trace}(\mathbf{A}\mathbf{A}^T)}$;
-* Operator norm (induced by a vector norm $\|\cdot\|$): $\|\mathbf{A}\| = \sup_{\mathbf{y}\neq\mathbf{0}}\frac{\|\mathbf{A}\mathbf{y}\|}{\|\mathbf{y}\|}$.
+
+-   Frobenius norm: $\|\mathbf{A}\|_F = \sqrt{\sum_{i,j=1}^n a_{ij}^2} = \sqrt{\text{trace}(\mathbf{A}\mathbf{A}^T)}$;
+-   Operator norm (induced by a vector norm $\|\cdot\|$): $\|\mathbf{A}\| = \sup_{\mathbf{y}\neq\mathbf{0}}\frac{\|\mathbf{A}\mathbf{y}\|}{\|\mathbf{y}\|}$.
 
 It can be shown that
-* $\|\mathbf{A}\|_1 = \max_{j=1,\dotsc,n}\sum_{i=1}^n|a_{ij}|$;
-* $\|\mathbf{A}\|_{\infty} = \max_{i=1,\dotsc,n}\sum_{j=1}^n|a_{ij}|$;
-* $\|\mathbf{A}\|_2 = \sqrt{\rho(\mathbf{A}^T\mathbf{A})}$.
+
+-   $\|\mathbf{A}\|_1 = \max_{j=1,\dotsc,n}\sum_{i=1}^n|a_{ij}|$;
+-   $\|\mathbf{A}\|_{\infty} = \max_{i=1,\dotsc,n}\sum_{j=1}^n|a_{ij}|$;
+-   $\|\mathbf{A}\|_2 = \sqrt{\rho(\mathbf{A}^T\mathbf{A})}$.
 
 ### Convergence of iterative methods
 
-- Let $\mathbf{x}^{\star}$ be a solution of $\mathbf{A}\mathbf{x} = \mathbf{b}$.
-- Equivalently, $\mathbf{x}^{\star}$ satisfies $\mathbf{x}^{\star} = \mathbf{R}\mathbf{x}^{\star} + \mathbf{c}$.
-- Subtracting this from $\mathbf{x}^{(t+1)} = \mathbf{R}\mathbf{x}^{(t)} + \mathbf{c}$, we have
+-   Let $\mathbf{x}^{\star}$ be a solution of $\mathbf{A}\mathbf{x} = \mathbf{b}$.
+-   Equivalently, $\mathbf{x}^{\star}$ satisfies $\mathbf{x}^{\star} = \mathbf{R}\mathbf{x}^{\star} + \mathbf{c}$.
+-   Subtracting this from $\mathbf{x}^{(t+1)} = \mathbf{R}\mathbf{x}^{(t)} + \mathbf{c}$, we have
 $$
     \mathbf{x}^{(t+1)} - \mathbf{x}^{\star} = \mathbf{R}(\mathbf{x}^{(t)} - \mathbf{x}^{\star}).
 $$
